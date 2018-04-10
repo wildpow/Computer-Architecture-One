@@ -1,7 +1,7 @@
 /**
  * LS-8 v2.0 emulator skeleton code
  */
-
+const HLT = 0b00000001;
 /**
  * Class for simulating a simple Computer (CPU & memory)
  */
@@ -70,7 +70,7 @@ class CPU {
         // right now.)
 
         // !!! IMPLEMENT ME
-
+        this.reg.IR = this.ram.read(this.reg.PC);
         // Debugging output
         //console.log(`${this.reg.PC}: ${IR.toString(2)}`);
 
@@ -90,6 +90,9 @@ class CPU {
         // for any particular instruction.
         
         // !!! IMPLEMENT ME
+    }
+    HLT() {
+        this.stopClock();
     }
 }
 
