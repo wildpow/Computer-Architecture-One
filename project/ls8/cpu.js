@@ -1,7 +1,13 @@
 /**
  * LS-8 v2.0 emulator skeleton code
  */
+const LDI = 0b10011001;
 const HLT = 0b00000001;
+const PRN = 0b01000011;
+const MUL = 0b10101010;
+const PUSH = 0b01001101;
+const POP = 0b01001100;
+const SP = 7;
 /**
  * Class for simulating a simple Computer (CPU & memory)
  */
@@ -17,6 +23,7 @@ class CPU {
         
         // Special-purpose registers
         this.reg.PC = 0; // Program Counter
+        this.reg[SP] = 0xf4;
     }
 	
     /**
@@ -55,7 +62,7 @@ class CPU {
     alu(op, regA, regB) {
         switch (op) {
             case 'MUL':
-                // !!! IMPLEMENT ME
+            this.reg[regA] = this.reg[regA] * this.reg[regB]
                 break;
         }
     }
@@ -70,13 +77,42 @@ class CPU {
         // right now.)
 
         // !!! IMPLEMENT ME
-        this.reg.IR = this.ram.read(this.reg.PC);
+        // this.reg.IR = this.ram.read(this.reg.PC);
+        let IR = this.ram.read(this.reg.PC);
+        let operandA = this.ram.read(this.reg.PC + 1);
+        let operandB = this.ram.read(this.reg.PC + 2);
         // Debugging output
         //console.log(`${this.reg.PC}: ${IR.toString(2)}`);
-
+        switch(IR) {
+            case LDI:
+                this.reg[operandA] = operandB;
+                break;
+            case PRN:
+                console.log(this.reg[operandA])
+                break;
+            case HLT:
+                this.stopClock();
+                break;
+            case PUSH:
+                this.reg[SP]--;
+                this.ram.write(this.reg[SP], this.reg[operandA]);
+                break;
+            case POP:
+                this.reg[operandA] = this.ram.read(this.reg[SP]);
+                this.reg[SP]++;
+                break;
+            case MUL:
+                this.alu('MUL', operandA, operandB);
+                break;
+            default:
+                console.log("invalid instruction: " + IR)
+        }
         // Get the two bytes in memory _after_ the PC in case the instruction
         // needs them.
+        let operandCount = (IR >>> 6) & 0b11;
+        let totalIntructionLen = operandCount + 1;
 
+        this.reg.PC = totalIntructionLen;
         // !!! IMPLEMENT ME
 
         // Execute the instruction. Perform the actions for the instruction as
@@ -91,9 +127,9 @@ class CPU {
         
         // !!! IMPLEMENT ME
     }
-    HLT() {
-        this.stopClock();
-    }
+    // HLT() {
+    //     this.stopClock();
+    // }
 }
 
 module.exports = CPU;
